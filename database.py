@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class CurrencyDB:
     def __init__(self):
         self.json_latest = None
@@ -16,7 +17,7 @@ class CurrencyDB:
         cur.execute("""CREATE TABLE IF NOT EXISTS latest_currencies(
                         id INTEGER PRIMARY KEY AUTOINCREMENT ,
                         currencies TEXT UNIQUE,
-                        rates TEXT,
+                        rates FLOAT,
                         time_rates TEXT,
                         base_currency TEXT);""")
         query = """INSERT OR IGNORE INTO latest_currencies
@@ -34,19 +35,19 @@ class CurrencyDB:
         cur.execute(query)
         results = cur.fetchall()
         for row in results:
-            print(row)
+            yield row
         conn.close()
 
     def read_specific_columns(self, col_list):
         conn = sqlite3.connect(self.my_db)
         cur = conn.cursor()
         columns = ", ".join(col_list)
-        query = f"SELECT {columns} FROM latest_currencies;"
+        query = f"SELECT {columns} FROM latest_currencies ORDER BY rates;"
         cur.execute(query)
         results = cur.fetchall()
         for row in results:
             yield row
-            print(row)
+            # print(row)
         conn.close()
 
     def drop_latest_table(self):
@@ -58,7 +59,27 @@ class CurrencyDB:
         conn.close()
 
     def update(self):
-        pass
+        print(self.json_latest)
+        self.timestamp = self.json_latest['query']['timestamp']
+        self.base_currency = self.json_latest['query']['base_currency']
+        try:
+            conn = sqlite3.connect(self.my_db)
+            cur = conn.cursor()
+            print("Connected to SQLite")
+
+            query = """UPDATE latest_currencies SET (currencies, rates, time_rates, base_currency) = (?, ?, ?, ?);"""
+            for currency, rate in self.json_latest['data'].items():
+                cur.execute(query, (currency, rate, self.timestamp, self.base_currency))
+            conn.commit()
+            print("Record Updated successfully ")
+            cur.close()
+
+        except sqlite3.Error as error:
+            print("Failed to update sqlite table", error)
+        finally:
+            if conn:
+                conn.close()
+                print("The SQLite connection is closed")
 
     def delete(self):
         pass
