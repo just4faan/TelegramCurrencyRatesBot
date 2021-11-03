@@ -67,7 +67,10 @@ class CurrencyDB:
             cur = conn.cursor()
             print("Connected to SQLite")
 
-            query = """UPDATE latest_currencies SET (currencies, rates, time_rates, base_currency) = (?, ?, ?, ?);"""
+            # query = """UPDATE latest_currencies SET (currencies, rates, time_rates, base_currency) = (?, ?, ?, ?);"""
+            query = """REPLACE INTO latest_currencies
+                                        (currencies, rates, time_rates, base_currency) VALUES
+                                        (?, ?, ?, ?);"""
             for currency, rate in self.json_latest['data'].items():
                 cur.execute(query, (currency, rate, self.timestamp, self.base_currency))
             conn.commit()
