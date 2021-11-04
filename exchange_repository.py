@@ -1,35 +1,49 @@
-
+import time
+from threading import Thread
 from web_service import WebService
 from database import CurrencyDB
-
+from datetime import datetime as dt
 
 class ExchangeRepo:
     def __init__(self):
+        self.dtime = dt.now()
+        print(self.dtime)
+
         self.curr_db = CurrencyDB()
         self.ws = WebService()
 
-        self.curr_db.json_latest = self.ws.get_latest_json_currencies()
-        self.curr_db.create()
-        self.curr_db.read()
+        # self.curr_db.json_latest = self.ws.get_latest_json_currencies()
+        # self.curr_db.create()
 
         # self.curr_db.update()
         # self.curr_db.drop_latest_table()
 
-        # SELECT all data
-        # self.currencies_rates_all = self.curr_db.read()
-
-        # SELECT specific data: currencies and rates
-        self.currencies_rates_specific = self.curr_db.read_specific_columns(['currencies', 'rates'])
-
         # all currencies and rates in string variable
-        self.all_text = ""
-        for k in self.currencies_rates_specific:
-            # print(k[0], '->', k[1])
-            self.all_text += f"{k[0]} -> {k[1]}\n"
-        print(self.all_text)
+        self.text_curr_rates = self.curr_db.read_specific_columns(['currencies', 'rates'])
+        print(self.text_curr_rates)
 
+    @property
+    def text_curr_rates(self):
+        return self._text_curr_rates
 
+    @text_curr_rates.setter
+    def text_curr_rates(self, curr_rates_columns):
+        text = ''
 
+        for k in curr_rates_columns:
+            text += f"{k[0]} -> {k[1]}\n"
+        # print(text)
+        self._text_curr_rates = text
+
+    # Every 10 minutes request from currency API and update db
+    def request_every_ten_minutes(self):
+        while True:
+            time.sleep(30)
+            print("Updating db with json data...")
+            self.curr_db.json_latest = self.ws.get_latest_json_currencies()
+            self.curr_db.update()
+            self.text_curr_rates = self.curr_db.read_specific_columns(['currencies', 'rates'])
+            time.sleep(1)
 
 if __name__ == '__main__':
     pass

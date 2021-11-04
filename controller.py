@@ -1,16 +1,24 @@
+import time
+from threading import Thread
 from exchange_repository import ExchangeRepo
 from telegram_service import TelegramService
-from datetime import datetime as dt
+
+
 
 class Controller:
     def __init__(self):
-        self.dtime = dt.now()
-        print(self.dtime)
+        t1 = Thread(target=self.main_flow)
+        t2 = Thread(target=self.exch_repo.request_every_ten_minutes())
 
-        self.exch_repo = ExchangeRepo()
-        self.tg = TelegramService(self.exch_repo.all_text)
+        t1.start()
+        t2.start()
+
+        t1.join()
+        t2.join()
 
         print('*'*50)
 
-    def run(self):
-        pass
+    def main_flow(self):
+        self.exch_repo = ExchangeRepo()
+        self.tg = TelegramService(self.exch_repo.text_curr_rates)
+        time.sleep(2)
