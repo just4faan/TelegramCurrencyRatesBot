@@ -12,51 +12,87 @@ class CurrencyDB:
         self.timestamp = self.json_latest['query']['timestamp']
         self.base_currency = self.json_latest['query']['base_currency']
 
-        conn = sqlite3.connect(self.my_db)
-        cur = conn.cursor()
-        cur.execute("""CREATE TABLE IF NOT EXISTS latest_currencies(
-                        id INTEGER PRIMARY KEY AUTOINCREMENT ,
-                        currencies TEXT UNIQUE,
-                        rates FLOAT,
-                        time_rates TEXT,
-                        base_currency TEXT);""")
-        query = """INSERT OR IGNORE INTO latest_currencies
-                            (currencies, rates, time_rates, base_currency) VALUES
-                            (?, ?, ?, ?);"""
-        for currency, rate in self.json_latest['data'].items():
-            cur.execute(query, (currency, rate, self.timestamp, self.base_currency))
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect(self.my_db)
+            cur = conn.cursor()
+            cur.execute("""CREATE TABLE IF NOT EXISTS latest_currencies(
+                            id INTEGER PRIMARY KEY AUTOINCREMENT ,
+                            currencies TEXT UNIQUE,
+                            rates FLOAT,
+                            time_rates TEXT,
+                            base_currency TEXT);""")
+            print("SQLite table created")
+            query = """INSERT OR IGNORE INTO latest_currencies
+                                (currencies, rates, time_rates, base_currency) VALUES
+                                (?, ?, ?, ?);"""
+            for currency, rate in self.json_latest['data'].items():
+                cur.execute(query, (currency, rate, self.timestamp, self.base_currency))
+            conn.commit()
+            print("Record Inserted successfully ")
+            conn.close()
+        except sqlite3.Error as error:
+            print("Error while creating or inserting sqlite table", error)
+        finally:
+            if conn:
+                conn.close()
+                print("The SQLite connection is closed")
 
     def read(self):
-        conn = sqlite3.connect(self.my_db)
-        cur = conn.cursor()
-        query = "SELECT * FROM latest_currencies;"
-        cur.execute(query)
-        results = cur.fetchall()
-        for row in results:
-            yield row
-        conn.close()
+        try:
+            conn = sqlite3.connect(self.my_db)
+            cur = conn.cursor()
+            query = "SELECT * FROM latest_currencies;"
+            cur.execute(query)
+            results = cur.fetchall()
+            for row in results:
+                yield row
+
+            conn.close()
+            print("Read all table successfully")
+
+        except sqlite3.Error as error:
+            print("Failed to read from sqlite table", error)
+        finally:
+            if conn:
+                conn.close()
+                print("The SQLite connection is closed")
 
     def read_specific_columns(self, col_list):
-        conn = sqlite3.connect(self.my_db)
-        cur = conn.cursor()
-        columns = ", ".join(col_list)
-        query = f"SELECT {columns} FROM latest_currencies ORDER BY rates;"
-        cur.execute(query)
-        results = cur.fetchall()
-        for row in results:
-            yield row
-            # print(row)
-        conn.close()
+        try:
+            conn = sqlite3.connect(self.my_db)
+            cur = conn.cursor()
+            columns = ", ".join(col_list)
+            query = f"SELECT {columns} FROM latest_currencies ORDER BY rates;"
+            cur.execute(query)
+            results = cur.fetchall()
+            for row in results:
+                yield row
+
+            conn.close()
+            print("Read specific columns successfully")
+
+        except sqlite3.Error as error:
+            print("Failed to read specific columns from sqlite table", error)
+        finally:
+            if conn:
+                conn.close()
+                print("The SQLite connection is closed")
 
     def drop_latest_table(self):
-        conn = sqlite3.connect(self.my_db)
-        cur = conn.cursor()
-        query = "DROP TABLE IF EXISTS latest_currencies;"
-        cur.execute(query)
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect(self.my_db)
+            cur = conn.cursor()
+            query = "DROP TABLE IF EXISTS latest_currencies;"
+            cur.execute(query)
+            conn.commit()
+            conn.close()
+            print("Deleted table successfully")
+        except sqlite3.Error as error:
+            print("Failed to delete table from sqlite table", error)
+        finally:
+            if conn:
+                conn.close()
+                print("The SQLite connection is closed")
 
     def update(self):
         print(self.json_latest)
