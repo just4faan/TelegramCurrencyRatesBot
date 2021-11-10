@@ -9,13 +9,13 @@ from threading import Thread
 
 
 class TelegramService:
-    def __init__(self, currencies_rates_text, curr_rates_generator):
+    def __init__(self, currencies_rates_text, curr_rates_list):
         # self.__TOKEN = 'YOUR_TOKEN'
         self.TIMEZONE = 'Europe/Kiev'
         self.TIMEZONE_COMMON_NAME = 'Kiev'
         self.bot = telebot.TeleBot(self.__TOKEN)
         self.currencies_rates_text = currencies_rates_text
-        self.curr_rates_generator = list(curr_rates_generator)
+        self.curr_rates_list = curr_rates_list
         print(threading.get_ident())
 
         @self.bot.message_handler(commands=['start'])
@@ -77,18 +77,17 @@ class TelegramService:
             usd_to_curr = self.convert_usd_to_currency(clean)
             if usd_to_curr:
                 result += str(usd_to_curr)
-            print(usd_to_curr)
-            print(clean)
-        else:
-            result = "Wrong exchange input, rerun command and try again"
-            print(result)
+            else: result = "Wrong exchange input, rerun command and try again"
+            # print(usd_to_curr)
+            # print(clean)
+        else: result = "Wrong exchange input, rerun command and try again"
         self.bot.send_message(message.chat.id, result)
 
     def convert_usd_to_currency(self, convert: list):
         amount_usd = convert[1]
         check_curr = convert[2]
         exchange_rate = 0
-        for curr, rate in self.curr_rates_generator:
+        for curr, rate in self.curr_rates_list:
             if curr == check_curr:
                 print(curr, ' : ', rate)
                 exchange_rate = rate * float(amount_usd)

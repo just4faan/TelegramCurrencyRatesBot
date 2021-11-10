@@ -21,7 +21,7 @@ class ExchangeRepo:
 
         # all currencies and rates in string variable
         self.text_curr_rates = self.curr_db.read_specific_columns(['currencies', 'rates'])
-        self.curr_rates_generator = self.curr_db.read_specific_columns(['currencies', 'rates'])
+        self.curr_rates_list = list(self.curr_db.read_specific_columns(['currencies', 'rates']))
         print(self.text_curr_rates)
 
     @property
