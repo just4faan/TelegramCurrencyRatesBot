@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 class WebService:
     def __init__(self):
         self.BASE_URL = 'https://freecurrencyapi.net/api/v2/'
-        self.__API_KEY = '87e07f20-3508-11ec-9594-63b97110f843'
+        # self.__API_KEY = 'YOUR_API'
         self.LATEST_ENDPOINT = 'latest?'
         self.HISTORICAL_ENDPOINT = 'historical?'
 
