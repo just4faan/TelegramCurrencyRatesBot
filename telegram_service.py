@@ -10,7 +10,7 @@ from threading import Thread
 
 class TelegramService:
     def __init__(self, currencies_rates_text, curr_rates_generator):
-        self.__TOKEN = 'YOUR_TOKEN'
+        # self.__TOKEN = 'YOUR_TOKEN'
         self.TIMEZONE = 'Europe/Kiev'
         self.TIMEZONE_COMMON_NAME = 'Kiev'
         self.bot = telebot.TeleBot(self.__TOKEN)
@@ -80,7 +80,7 @@ class TelegramService:
             "^(/exchange [$]([0-9]+) to ([A-Z]{3,3})|/exchange ([0-9]+) USD to ([A-Z]{3,3}))$")
         curr_search = exchange_currencies.search(message.text)
         if curr_search is not None:
-            clean = list(filter(None, curr_search.groups()))
+            clean = list(filter(None, curr_search.groups()[1]))
             print(clean)
         else:
             clean = "Wrong exchange input, rerun command and try again"
