@@ -15,7 +15,7 @@ class TelegramService:
         self.TIMEZONE_COMMON_NAME = 'Kiev'
         self.bot = telebot.TeleBot(self.__TOKEN)
         self.currencies_rates_text = currencies_rates_text
-        self.curr_rates_generator = curr_rates_generator
+        self.curr_rates_generator = list(curr_rates_generator)
         print(threading.get_ident())
 
         @self.bot.message_handler(commands=['start'])
@@ -43,14 +43,6 @@ class TelegramService:
 
     def run_bot(self):
         self.bot.infinity_polling()
-
-    # def request_every_ten_minutes(self):
-    #     while True:
-    #         time.sleep(3)
-    #         print("Updating db with json data...")
-            # self.curr_db.json_latest = self.ws.get_latest_json_currencies()
-            # self.curr_db.update()
-            # self.text_curr_rates = self.curr_db.read_specific_columns(['currencies', 'rates'])
 
     @property
     def currencies_rates_text(self):
@@ -80,12 +72,27 @@ class TelegramService:
             "^(/exchange [$]([0-9]+) to ([A-Z]{3,3})|/exchange ([0-9]+) USD to ([A-Z]{3,3}))$")
         curr_search = exchange_currencies.search(message.text)
         if curr_search is not None:
-            clean = list(filter(None, curr_search.groups()[1]))
+            result = ""
+            clean = list(filter(None, curr_search.groups()))
+            usd_to_curr = self.convert_usd_to_currency(clean)
+            if usd_to_curr:
+                result += str(usd_to_curr)
+            print(usd_to_curr)
             print(clean)
         else:
-            clean = "Wrong exchange input, rerun command and try again"
-            print(clean)
-        self.bot.send_message(message.chat.id, clean)
+            result = "Wrong exchange input, rerun command and try again"
+            print(result)
+        self.bot.send_message(message.chat.id, result)
+
+    def convert_usd_to_currency(self, convert: list):
+        amount_usd = convert[1]
+        check_curr = convert[2]
+        exchange_rate = 0
+        for curr, rate in self.curr_rates_generator:
+            if curr == check_curr:
+                print(curr, ' : ', rate)
+                exchange_rate = rate * float(amount_usd)
+        return exchange_rate
 
     def get_history(self, message):
         self.bot.send_message(message.chat.id, 'hiiistory')

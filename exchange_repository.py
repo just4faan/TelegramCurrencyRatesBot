@@ -40,7 +40,7 @@ class ExchangeRepo:
     # Every 10 minutes request from currency API and update db
     def request_every_ten_minutes(self):
         while True:
-            time.sleep(600)
+            time.sleep(60000)
             print("Updating db with json data...")
             print(threading.get_ident())
             self.curr_db.json_latest = self.ws.get_latest_json_currencies()
