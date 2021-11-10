@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 class Controller:
     def __init__(self):
         self.exch_repo = ExchangeRepo()
-        self.tg = TelegramService(self.exch_repo.text_curr_rates, self.exch_repo.curr_rates_generator)
+        self.tg = TelegramService(self.exch_repo.text_curr_rates, self.exch_repo.curr_rates_list)
 
         print(threading.get_ident())
 
