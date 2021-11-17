@@ -10,7 +10,7 @@ from threading import Thread
 
 class TelegramService:
     def __init__(self, currencies_rates_text, curr_rates_list):
-        # self.__TOKEN = 'YOUR_TOKEN'
+        self.__TOKEN = 'YOUR_TOKEN'
         self.TIMEZONE = 'Europe/Kiev'
         self.TIMEZONE_COMMON_NAME = 'Kiev'
         self.bot = telebot.TeleBot(self.__TOKEN)
@@ -35,7 +35,7 @@ class TelegramService:
         def _get_currency_exchange(message):
             self.get_currency_exchange(message)
         
-        @self.bot.message_handler(commands=['history'])
+        @self.bot.message_handler(regexp='/history')
         def _get_history(message):
             self.get_history(message)
 
@@ -74,13 +74,16 @@ class TelegramService:
         if curr_search is not None:
             result = ""
             clean = list(filter(None, curr_search.groups()))
+            print(clean)
+            # save exchange rate of converting usd to specific currency
             usd_to_curr = self.convert_usd_to_currency(clean)
+            # if result not empty
             if usd_to_curr:
                 result += str(usd_to_curr)
-            else: result = "Wrong exchange input, rerun command and try again"
+            else: result = f"Wrong currency input, rerun command and try again"
             # print(usd_to_curr)
             # print(clean)
-        else: result = "Wrong exchange input, rerun command and try again"
+        else: result = "Wrong /exchange input, rerun command and try again"
         self.bot.send_message(message.chat.id, result)
 
     def convert_usd_to_currency(self, convert: list):
@@ -94,17 +97,13 @@ class TelegramService:
         return exchange_rate
 
     def get_history(self, message):
+        history_rates = re.compile("(/history USD/([A-Z]{3,3}) for 10 days)")
+        hist_search = history_rates.search(message.text)
+        if hist_search is not None:
+            clean = list(hist_search.groups())
+            print(clean)
+        else: print("wrong input")
         self.bot.send_message(message.chat.id, 'hiiistory')
-
-        # @bot.message_handler(commands=['kek'])
-        # def long_message(message):
-        #     for i in TelegramService.sel:
-        #         if message.text == i[0]:
-        #             bot.send_message(message.chat.id, f"{i[0]} -> {i[1]}")
-        #     for i in TelegramService.sel:
-        #         if message.text == '/kek {}'.format(i[0]):
-        #             print(i)
-        #             bot.send_message(message.chat.id, f"{i[0]} -> {i[1]}")
 
 
 if __name__ == '__main__':

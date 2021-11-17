@@ -19,9 +19,14 @@ class ExchangeRepo:
         # self.curr_db.update()
         # self.curr_db.drop_latest_table()
 
+        self.curr_db.json_history = self.ws.get_historical_json_currencies()
+        self.curr_db.create_history_currencies_table()
+
+        self.curr_db.read_all_currencies("history_currencies")
+
         # all currencies and rates in string variable
-        self.text_curr_rates = self.curr_db.read_specific_columns(['currencies', 'rates'])
-        self.curr_rates_list = list(self.curr_db.read_specific_columns(['currencies', 'rates']))
+        self.text_curr_rates = self.curr_db.read_specific_latest_columns(['currencies', 'rates'])
+        self.curr_rates_tuple = tuple(self.curr_db.read_specific_latest_columns(['currencies', 'rates']))
         print(self.text_curr_rates)
 
     @property
@@ -44,8 +49,8 @@ class ExchangeRepo:
             print("Updating db with json data...")
             print(threading.get_ident())
             self.curr_db.json_latest = self.ws.get_latest_json_currencies()
-            self.curr_db.update()
-            self.text_curr_rates = self.curr_db.read_specific_columns(['currencies', 'rates'])
+            self.curr_db.update_latest_currencies_table()
+            self.text_curr_rates = self.curr_db.read_specific_latest_columns(['currencies', 'rates'])
 
 
 if __name__ == '__main__':
