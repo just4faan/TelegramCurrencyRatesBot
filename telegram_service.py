@@ -32,12 +32,12 @@ class TelegramService:
             
         # @self.bot.message_handler(regexp=["^(/exchange [$]([0-9]+) to ([A-Z]{3,3})|/exchange ([0-9]+) USD to ([A-Z]{3,3}))$"])
         @self.bot.message_handler(regexp='/exchange')
-        def _get_currency_exchange(message):
-            self.get_latest_exchange(message)
+        def _get_latest_currency_exchange(message):
+            self.get_latest_currency_exchange(message)
         
         @self.bot.message_handler(regexp='/history')
-        def _get_history_exchange(message):
-            self.get_history_exchange(message)
+        def _get_history_currency_exchange(message):
+            self.get_history_currency_exchange(message)
 
         # self.bot.infinity_polling()
 
@@ -67,7 +67,7 @@ class TelegramService:
     def get_currencies_rates(self, message):
         self.bot.send_message(message.chat.id, self.currencies_rates_text)
 
-    def get_latest_exchange(self, message):
+    def get_latest_currency_exchange(self, message):
         exchange_currencies = re.compile(
             "^(/exchange [$]([0-9]+) to ([A-Z]{3,3})|/exchange ([0-9]+) USD to ([A-Z]{3,3}))$")
         curr_search = exchange_currencies.search(message.text)
@@ -96,7 +96,7 @@ class TelegramService:
                 exchange_rate = rate * float(amount_usd)
         return exchange_rate
 
-    def get_history_exchange(self, message):
+    def get_history_currency_exchange(self, message):
         history_rates = re.compile("(/history USD/([A-Z]{3,3}) for 10 days)")
         hist_search = history_rates.search(message.text)
         if hist_search is not None:
